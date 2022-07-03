@@ -1,5 +1,3 @@
-
-
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
@@ -24,7 +22,9 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-enabled-themes '(wheatgrass))
- '(package-selected-packages '(use-package smart-tab)))
+ '(custom-safe-themes
+    '("5a611788d47c1deec31494eb2bb864fde402b32b139fe461312589a9f28835db" default))
+ '(package-selected-packages '(modus-themes use-package smart-tab)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -47,3 +47,14 @@
 
 ;; Org mode configuration
 (setq org-startup-indented t)
+
+;; modus theme configuration
+
+(setq modus-themes-italic-constructs t
+    modus-themes-bold-constructs t
+    modus-themes-paren-match '(bold intense)
+    modus-themes-mode-line '(accented borderless padded)
+    modus-themes-syntax '(alt-syntax faint)
+    modus-themes-region '(bg-only))
+    
+(load-theme 'modus-vivendi)
