@@ -1,3 +1,16 @@
+(setenv "BASH_ENV" "$HOME/.bashrc")
+
+(defun set-exec-path-from-shell-PATH ()
+  (let ((path-from-shell (replace-regexp-in-string
+                          "[ \t\n]*$"
+                          ""
+                          (shell-command-to-string "$SHELL --login -i -c 'echo $PATH'"))))
+    (setenv "PATH" path-from-shell)
+    (setq eshell-path-env path-from-shell) ; for eshell users
+    (setq exec-path (split-string path-from-shell path-separator))))
+
+(when window-system (set-exec-path-from-shell-PATH))
+
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
@@ -23,8 +36,10 @@
  ;; If there is more than one, they won't work right.
  '(custom-enabled-themes '(wheatgrass))
  '(custom-safe-themes
-    '("5a611788d47c1deec31494eb2bb864fde402b32b139fe461312589a9f28835db" default))
- '(package-selected-packages '(modus-themes use-package smart-tab)))
+   '("a0415d8fc6aeec455376f0cbcc1bee5f8c408295d1c2b9a1336db6947b89dd98" "5a611788d47c1deec31494eb2bb864fde402b32b139fe461312589a9f28835db" default))
+ '(ispell-dictionary nil)
+ '(package-selected-packages
+   '(go-mode company which-key flycheck pyvenv python-mode lsp-mode modus-themes use-package smart-tab)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -58,3 +73,51 @@
     modus-themes-region '(bg-only))
     
 (load-theme 'modus-vivendi)
+
+(use-package which-key
+  :ensure t
+  :config
+  (which-key-mode))
+
+;; lsp-mode for python
+(use-package lsp-mode
+  :ensure t
+  :bind (:map lsp-mode-map
+	      ("C-c l" . lsp-command-map)
+              ("C-c d" . lsp-describe-thing-at-point)
+	      ("C-c a" . lsp-execute-code-action))
+  :config
+  (lsp-enable-which-key-integration t))
+
+
+;; company-mode configuration
+(use-package company
+  :ensure t
+  :hook ((emacs-lisp-mode . (lambda ()
+			      (setq-local company-backends '(company-elisp))))
+	 (emacs-lisp-mode . company-mode))
+  :config
+  (company-keymap--unbind-quick-access company-active-map)
+  (company-tng-configure-default)
+  (setq company-idle-delay 0.1
+	company-minimum-prefix-length 1))
+
+
+;; Go-mode configuration
+
+(use-package go-mode
+  :ensure t
+  :hook ((go-mode . lsp-deferred)
+	 (go-mode . company-mode))
+  :bind (:map go-mode-map
+	      ("<f6>" . gofmt)
+	      ("C-c 6" . gofmt))
+  :config
+  (require 'lsp-go)
+  (setq lsp-go-analyses
+	'((fieldalignment . t)
+	  (nilness        . t)
+	  (unusedwrite    . t)
+	  (unusedparams   . t)))
+  (add-to-list 'exec-path "~/go/bin")
+  (setq gofmt-command "goimports"))
